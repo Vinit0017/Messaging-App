@@ -3,5 +3,8 @@ node_modules
 .env
 
 /generated/prisma
+<<<<<<< HEAD
 
 .vscode
+=======
+>>>>>>> 2c19845d448cee0d66ae4c5c375049eb7454ad50
