@@ -1,0 +1,76 @@
+datasource db {
+  provider = "postgresql"
+}
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated/prisma"
+}
+
+enum Status {
+    ONLINE
+    OFFLINE
+    AFK
+    TYPING
+}
+
+model User {
+    id          String          @id @default(uuid())
+    username    String          @unique
+    email       String          @unique
+    password    String
+    createdAt   DateTime        @default(now())
+    lastSeenAt  DateTime?        
+    status      Status          @default(ONLINE)
+    profiles    Profile[]
+    friends     Friend[]
+}
+
+model Profile {
+    id          String          @id @default(uuid())
+    userId      String
+    user        User            @relation(fields: [userId], references: [id])
+    displayName String          @default("YOU")
+    bio         String
+    avatarUrl   String
+    createdAt   DateTime        @default(now())
+    messages    Message[]
+    conversations  Conversation[]
+}
+
+model Conversation {
+    id          String          @id @default(uuid())
+    createdAt   DateTime        @default(now())
+    name        String?
+    profileId   String
+    profile     Profile            @relation(fields: [profileId], references: [id])
+    messages    Message[]
+    participants ConversationParticipant[]
+}
+
+model ConversationParticipant {
+    conversationId  String
+    conversation    Conversation    @relation(fields: [conversationId], references: [id])
+    profileId       String
+
+    @@id([conversationId, profileId])
+}
+
+model Message {
+    id              String          @id @default(uuid())
+    conversationId  String          
+    conversation    Conversation    @relation(fields: [conversationId], references: [id])
+    senderId        String
+    sender          Profile         @relation(fields: [senderId], references: [id])
+    content         String?
+    attachedUrl     String[]
+    createdAt       DateTime        @default(now())
+}
+
+model Friend {
+    userId          String
+    user            User            @relation(fields: [userId], references: [id])
+    friendId        String
+    status          Status          @default(ONLINE)
+
+    @@id([userId, friendId])
+}
