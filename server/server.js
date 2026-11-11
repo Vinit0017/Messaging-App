@@ -1,4 +1,4 @@
-require("dotenv").config();
+import "dotenv/config";
 import express from "express";
 import errorHandler from "./middlewares/errorHandler.js";
 
@@ -8,7 +8,11 @@ app.use(express.json());
 
 app.use(express.urlencoded({extended: true}));
 
-app.use("/auth", authRouter);
+app.use("/auth", (req, res, next) =>{
+    res.status(200).json({
+        data: "Ok!",
+    })
+});
 
 app.use((req, res, next) =>{
     res.status(404).send("Page not found!");
