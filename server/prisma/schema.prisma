@@ -23,6 +23,7 @@ model User {
     status      Status          @default(ONLINE)
     profiles    Profile[]
     friends     Friend[]
+    refreshToken String?        @unique
 }
 
 model Profile {
