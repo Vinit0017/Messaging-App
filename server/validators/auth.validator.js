@@ -19,7 +19,6 @@ export const validateSignUp = [
         .notEmpty().withMessage("Email is required!")
         .isLength({max: 50}).withMessage("Email is too long!")
         .isEmail({allow_utf8_local_part: true}).withMessage("Please provide a valid email!")
-        .normalizeEmail()
         .custom(async (value) =>{
             const exists = await userQueries.getUserByEmail(value);
             if(exists) throw new Error("Email is already under use by another account!");
@@ -47,7 +46,7 @@ export const validateSignUp = [
 
 export const validateLogin =[
     body("usernameOrEmail")
-        .isString().withMessage("Invalid Username or Password!")
+        .isString().withMessage("Username or Password must be a string!")
         .trim()
         .notEmpty().withMessage("Username or email is required!")
         .custom((value) =>{
