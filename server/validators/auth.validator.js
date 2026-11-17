@@ -9,7 +9,7 @@ export const validateSignUp = [
         .isLength({max: 100}).withMessage("Username is too long!")
         .matches(/^[a-zA-Z0-9_]+$/).withMessage("Username can only contain letters, numbers and underscore.")
         .custom( async (value) =>{
-            const exists = await userQueries.getUserByUsername(value);
+            const exists = await userQueries.getUserByUsernameOrEmail(value);
             if(exists) throw new Error("Username already taken!");
         }),
 
@@ -20,7 +20,7 @@ export const validateSignUp = [
         .isLength({max: 50}).withMessage("Email is too long!")
         .isEmail({allow_utf8_local_part: true}).withMessage("Please provide a valid email!")
         .custom(async (value) =>{
-            const exists = await userQueries.getUserByEmail(value);
+            const exists = await userQueries.getUserByUsernameOrEmail(value);
             if(exists) throw new Error("Email is already under use by another account!");
         }),
 

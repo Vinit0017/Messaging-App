@@ -12,36 +12,7 @@ export async function createUser(username, email, password){
             username: true,
             email: true,
             createdAt: true,
-            profiles: {
-                select: {
-                    id: true,
-                    displayName: true,
-                    bio: true,
-                    avatarUrl: true
-                },
-            },
-            friends: {
-                select:{
-                    friendId: true,
-                    status: true,
-                }
-            }
-        },
-    });
-};
-
-export async function getUserByUsername(username) {
-    return prisma.user.findUnique({
-        where: {
-            username: username,
-        },
-    });
-};
-
-export async function getUserByEmail(email) {
-    return prisma.user.findUnique({
-        where: {
-            email: email,
+            status: true,
         },
     });
 };
@@ -72,10 +43,10 @@ export async function getUserByRefreshToken(refreshToken) {
     });
 };
 
-export async function setRefreshToken(id, value) {
+export async function setRefreshToken(userId, value) {
     return prisma.user.update({
         where: {
-            id: id,
+            id: userId,
         },
         data:{
             refreshToken: value,
@@ -87,4 +58,54 @@ export async function setRefreshToken(id, value) {
             refreshToken: true,
         }
     })
-}
+};
+
+export async function getUserSummary(userId){
+    return prisma,user.findUnique({
+        where:{
+            id: userId,
+        },
+        select:{
+            id:true,
+            username: true,
+            email: true,
+            status: true,
+            lastSeenAt: true,
+        },
+    });
+};
+
+export async function getUserProfile(userId) {
+    return prisma.user.findUnique({
+        where:{
+            id:userId,
+        },
+        select:{
+            profile:{
+                select:{
+                    id: true,
+                    displayName: true,
+                    bio: true,
+                    avatarUrl: true,
+                    createdAt: true
+                },
+            },
+        },
+    });
+};
+
+export async function getUserConversations(userId) {
+    return prisma.user.findUnique({
+        where:{
+            id: userId,
+        },
+        select:{
+            conversations:{
+                select: true,
+                createdAt: true,
+                name: true,
+                userId: true,
+            },
+        },
+    });
+};

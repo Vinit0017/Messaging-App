@@ -6,6 +6,11 @@ generator client {
   output   = "./generated/prisma"
 }
 
+enum FriendStatus{
+    PENDING
+    ACCEPTED
+}
+
 enum Status {
     ONLINE
     OFFLINE
@@ -21,29 +26,34 @@ model User {
     createdAt   DateTime        @default(now())
     lastSeenAt  DateTime?        
     status      Status          @default(ONLINE)
-    profiles    Profile[]
-    friends     Friend[]
+
+    profile     Profile?
+
+    friendshipAsUser1     Friendship[]        @relation("User1Friendships")
+    friendshipAsUser2     Friendship[]        @relation("User2Friendships")
+
     refreshToken String?        @unique
+
+    messages    Message[]
+    conversations  Conversation[]
 }
 
 model Profile {
     id          String          @id @default(uuid())
-    userId      String
-    user        User            @relation(fields: [userId], references: [id])
+    userId      String          @unique
+    user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
     displayName String          @default("YOU")
-    bio         String
-    avatarUrl   String
+    bio         String?
+    avatarUrl   String?
     createdAt   DateTime        @default(now())
-    messages    Message[]
-    conversations  Conversation[]
 }
 
 model Conversation {
     id          String          @id @default(uuid())
     createdAt   DateTime        @default(now())
     name        String?
-    profileId   String
-    profile     Profile            @relation(fields: [profileId], references: [id])
+    userId      String
+    user        User            @relation(fields: [userId], references: [id])
     messages    Message[]
     participants ConversationParticipant[]
 }
@@ -51,9 +61,9 @@ model Conversation {
 model ConversationParticipant {
     conversationId  String
     conversation    Conversation    @relation(fields: [conversationId], references: [id])
-    profileId       String
+    userId          String
 
-    @@id([conversationId, profileId])
+    @@id([conversationId, userId])
 }
 
 model Message {
@@ -61,17 +71,24 @@ model Message {
     conversationId  String          
     conversation    Conversation    @relation(fields: [conversationId], references: [id])
     senderId        String
-    sender          Profile         @relation(fields: [senderId], references: [id])
+    sender          User            @relation(fields: [senderId], references: [id])
     content         String?
     attachedUrl     String[]
     createdAt       DateTime        @default(now())
 }
 
-model Friend {
-    userId          String
-    user            User            @relation(fields: [userId], references: [id])
-    friendId        String
-    status          Status          @default(ONLINE)
+model Friendship {
+    user1Id         String
+    user2Id         String
 
-    @@id([userId, friendId])
+    user1           User            @relation("User1Friendships", fields: [user1Id], references: [id], onDelete: Cascade)
+    user2           User            @relation("User2Friendships", fields: [user2Id], references: [id], onDelete: Cascade)
+
+    requestedById   String
+    status          FriendStatus    @default(PENDING)
+    createdAt       DateTime        @default(now())
+    updatedAt       DateTime        @updatedAt
+
+    @@id([user1Id, user2Id])
+    @@index([user2Id, status])
 }
