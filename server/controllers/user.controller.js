@@ -108,14 +108,15 @@ export async function deleteUser(req, res, next) {
         const result = await prisma.$transaction(async (tx) =>{
             const randomSuffix = crypto.randomBytes(4).toString('hex');
 
-            const userProfile = await userQueries.getUserProfile(user.id, tx);
-            if(!userProfile.profile.id)throw new CustomError("User profile not found!", 404, "INVALID_REQUEST!");
+            // const userProfile = await userQueries.getUserProfile(user.id, tx);
+            // if(!userProfile.profile.id)throw new CustomError("User profile not found!", 404, "INVALID_REQUEST!");
 
-            await deleteProfile(userProfile.profile.id, tx);
+            // await deleteProfile(userProfile.profile.id, tx);
             await userQueries.deleteUser(user.id, randomSuffix, tx);
         });
+        console.log(result);
 
-        return res.status(204);
+        return res.sendStatus(204);
     }catch(err){
         next(err);
     };
