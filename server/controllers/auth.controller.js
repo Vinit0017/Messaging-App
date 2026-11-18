@@ -22,7 +22,7 @@ export async function register(req, res, next) {
             "status": user.status,
         }
 
-        return res.status(201).json(formattedData);
+        return res.status(201).json({"data": formattedData});
     }catch(err){
         next(err);
     }
@@ -109,6 +109,7 @@ export async function logout(req, res, next) {
         if(!cookies?.jwt)throw new CustomError("Refresh token missing!", 401, "COOKIE_NOT_FOUND!");
 
         const refreshToken = cookies.jwt;
+        if(!refreshToken) throw new CustomError("Refresh token is not assigned!", 404, "INVALID_REFRESH_TOKEN!");
 
         const foundUser = await userQueries.getUserByRefreshToken(refreshToken);
         if(!foundUser){
@@ -146,7 +147,7 @@ export async function currentUser(req, res, next) {
             },
         }
 
-        return res.status(200).json(formattedData);
+        return res.status(200).json({"data": formattedData});
     }catch(err){
         next(err);
     }

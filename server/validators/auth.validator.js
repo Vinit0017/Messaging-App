@@ -46,7 +46,7 @@ export const validateSignUp = [
 
 export const validateLogin =[
     body("usernameOrEmail")
-        .isString().withMessage("Username or Password must be a string!")
+        .isString().withMessage("Username or email must be a string!")
         .trim()
         .notEmpty().withMessage("Username or email is required!")
         .custom((value) =>{

@@ -1,4 +1,6 @@
-export async function getUserFriends(userId) {
+import prisma from "../config/prisma.js";
+
+export async function getUserFriends(userId, tx=prisma) {
     const friendships = await prisma.friendships.findMany({
         where:{
             status: "ACCEPTED",

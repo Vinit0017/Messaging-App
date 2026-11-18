@@ -1,7 +1,7 @@
 import prisma from "../config/prisma.js";
 
-export async function createUser(username, email, password){
-    return prisma.user.create({
+export async function createUser(username, email, password, tx=prisma){
+    return tx.user.create({
         data:{
             username: username,
             password: password,
@@ -17,8 +17,8 @@ export async function createUser(username, email, password){
     });
 };
 
-export async function getUserByUsernameOrEmail(usernameOrEmail) {
-    return prisma.user.findFirst({
+export async function getUserByUsernameOrEmail(usernameOrEmail, tx=prisma) {
+    return tx.user.findFirst({
         where:{
             OR:[
                 {email: usernameOrEmail},
@@ -35,16 +35,47 @@ export async function getUserByUsernameOrEmail(usernameOrEmail) {
     });
 };
 
-export async function getUserByRefreshToken(refreshToken) {
-    return prisma.user.findUnique({
+export async function searchUserByUsernameOrEmail(usernameOrEmail, skip, limit, tx=prisma) {
+    return tx.user.findMany({
+        where:{
+            OR:[
+                {
+                    username: {
+                        contains: usernameOrEmail,
+                        mode: 'insensitive',
+                    },
+                },
+                {
+                    email:{
+                        contains: usernameOrEmail,
+                        mode: 'insensitive',
+                    },
+                },
+            ],
+        },
+        select:{
+            id: true,
+            username: true,
+            email: true,
+            status: true,
+            lastSeenAt: true,
+        },
+        orderBy: {username: "desc"},
+        skip: skip,
+        take: limit,
+    })
+}
+
+export async function getUserByRefreshToken(refreshToken, tx=prisma) {
+    return tx.user.findUnique({
         where:{
             refreshToken: refreshToken,
         }
     });
 };
 
-export async function setRefreshToken(userId, value) {
-    return prisma.user.update({
+export async function setRefreshToken(userId, value, tx=prisma) {
+    return tx.user.update({
         where: {
             id: userId,
         },
@@ -60,8 +91,8 @@ export async function setRefreshToken(userId, value) {
     })
 };
 
-export async function getUserSummary(userId){
-    return prisma,user.findUnique({
+export async function getUserSummary(userId, tx=prisma){
+    return tx.user.findUnique({
         where:{
             id: userId,
         },
@@ -75,8 +106,8 @@ export async function getUserSummary(userId){
     });
 };
 
-export async function getUserProfile(userId) {
-    return prisma.user.findUnique({
+export async function getUserProfile(userId, tx=prisma) {
+    return tx.user.findUnique({
         where:{
             id:userId,
         },
@@ -94,8 +125,8 @@ export async function getUserProfile(userId) {
     });
 };
 
-export async function getUserConversations(userId) {
-    return prisma.user.findUnique({
+export async function getUserConversations(userId, tx=prisma) {
+    return tx.user.findUnique({
         where:{
             id: userId,
         },
@@ -107,5 +138,39 @@ export async function getUserConversations(userId) {
                 userId: true,
             },
         },
+    });
+};
+
+export async function updateUsername(userId, newUsername, tx=prisma){
+    return tx.user.update({
+        where:{
+            id: userId
+        },
+        data:{
+            username: newUsername,
+        },
+        select:{
+            id: true,
+            username: true,
+            email: true,
+        },
+    });
+};
+
+export async function deleteUser(userId, randomSuffix, tx=prisma) {
+    return tx.user.update({
+        where:{
+            id: userId,
+        },
+        data:{
+            username: `deleted_user_${randomSuffix}`,
+            email: `deleted_${userId}@sys.local`,
+            password: `324f4de10cacf35d4ed1dd0158c8cc177c6d9654`,
+            refreshToken: null,
+            deletedAt: new Date(),
+        },
+        select:{
+            deletedAt: true,
+        }
     });
 };
