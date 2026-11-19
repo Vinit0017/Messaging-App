@@ -118,7 +118,6 @@ export async function getUserProfile(userId, tx=prisma) {
                     displayName: true,
                     bio: true,
                     avatarUrl: true,
-                    createdAt: true
                 },
             },
         },

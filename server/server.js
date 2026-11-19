@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import errorHandler from "./middlewares/errorHandler.js";
 import authRouter from "./routes/auth.router.js";
 import userRouter from "./routes/user.router.js";
+import profileRouter from "./routes/profile.router.js";
 import cors from "cors";
 
 const app = express();
@@ -19,6 +20,7 @@ app.use(cookieParser());
 
 app.use("/auth", authRouter);
 app.use("/users", userRouter);
+app.use("/profile", profileRouter);
 
 app.use((req, res, next) =>{
     res.status(404).send("Page not found!");

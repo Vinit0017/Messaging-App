@@ -35,8 +35,10 @@ export async function findUser(req, res, next) {
         };
 
         return res.status(200).json({
-            "data": formattedData,
-            "pagination": pageInformation,
+            "data": {
+                "user": formattedData,
+                "pagination": pageInformation,
+            }
         })
 
     }catch(err){
@@ -60,16 +62,20 @@ export async function getUser(req, res, next) {
             "username": userSummary.username,
             "status": userSummary.status,
             "lastSeenAt": userSummary.lastSeenAt,
-            "profile": {
-                "id": userProfile.id,
-                "displayName": userProfile.displayName,
-                "bio": userProfile.profile,
-                "avatarUrl": userProfile.avatarUrl,
-            }
         };
 
+        const formattedProfile = {
+            "id": userProfile.profile.id,
+            "displayName": userProfile.profile.displayName,
+            "bio": userProfile.profile.bio,
+            "avatarUrl": userProfile.profile.avatarUrl,
+        }
+
         return res.status(200).json({
-            "data": formattedData,
+            "data": {
+                "user": formattedData,
+                "profile": formattedProfile,
+            }
         });
     }catch(err){
         next(err);
@@ -92,7 +98,9 @@ export async function updateUsername(req, res, next) {
         }
     
         return res.status(200).json({
-            "data": formattedData,
+            "data": {
+                "user": formattedData,
+            }
         });
 
     }catch(err){
@@ -108,13 +116,12 @@ export async function deleteUser(req, res, next) {
         const result = await prisma.$transaction(async (tx) =>{
             const randomSuffix = crypto.randomBytes(4).toString('hex');
 
-            // const userProfile = await userQueries.getUserProfile(user.id, tx);
-            // if(!userProfile.profile.id)throw new CustomError("User profile not found!", 404, "INVALID_REQUEST!");
-
-            // await deleteProfile(userProfile.profile.id, tx);
+            const userProfile = await userQueries.getUserProfile(user.id, tx);
+            if(userProfile?.profile?.id !== null){
+                await deleteProfile(userProfile.profile.id, tx);
+            }
             await userQueries.deleteUser(user.id, randomSuffix, tx);
         });
-        console.log(result);
 
         return res.sendStatus(204);
     }catch(err){

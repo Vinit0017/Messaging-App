@@ -1,5 +1,4 @@
 import * as userQueries from "../queries/user.queries.js";
-import * as friendshipQueries from "../queries/friendship.queries.js";
 import jwt from "jsonwebtoken";
 import * as bcrypt from "../config/bcrypt.js";
 import CustomError from "../middlewares/CustomErrors.js";
@@ -22,7 +21,11 @@ export async function register(req, res, next) {
             "status": user.status,
         }
 
-        return res.status(201).json({"data": formattedData});
+        return res.status(201).json({
+            "data":{
+                "user": formattedData
+            }
+        });
     }catch(err){
         next(err);
     }
@@ -130,24 +133,20 @@ export async function currentUser(req, res, next) {
     try{
         const user = req.user;
         const userSummary = await userQueries.getUserSummary(user.id);
-        const userProfile = await userQueries.getUserProfile(user.id);
 
         if(!userSummary)throw new CustomError("Unable to get user summary!", 404, "NO_USER_DATA!");
-        if(!userProfile)throw new CustomError("Unable to get user profile!", 404, "NO_USER_DATA!");
 
         const formattedData = {
             "id": userSummary.id,
             "username": userSummary.username,
             "email": userSummary.email,
-            "profile": {
-                "id": userProfile.profile.id,
-                "displayName": userProfile.profile.displayName,
-                "bio": userProfile.profile.bio,
-                "avatarUrl": userProfile.profile.avatarUrl
-            },
         }
 
-        return res.status(200).json({"data": formattedData});
+        return res.status(200).json({
+            "data": {
+                "user": formattedData,
+            }
+        });
     }catch(err){
         next(err);
     }
